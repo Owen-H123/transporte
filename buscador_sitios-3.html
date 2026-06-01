@@ -1,0 +1,105 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Buscador de Sitios</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+  </head>
+  <body class="bg-slate-100 text-slate-900">
+    <div
+      id="welcome-overlay"
+      class="fixed inset-0 z-50 bg-white flex items-center justify-center transition-opacity duration-500"
+    >
+      <div
+        class="w-[92%] max-w-md border border-slate-200 rounded-2xl bg-white shadow-xl p-7 text-center"
+      >
+        <p
+          class="text-teal-700 text-[11px] tracking-[0.18em] uppercase mb-2 font-semibold"
+        >
+          Sites Claro
+        </p>
+        <h2 class="text-slate-900 text-3xl sm:text-4xl font-extrabold">
+          Bienvenido
+        </h2>
+        <p class="text-slate-500 text-sm mt-3">Iniciando buscador...</p>
+        <div
+          class="mt-5 h-1.5 w-full bg-slate-100 rounded-full overflow-hidden"
+        >
+          <div
+            class="h-full w-1/2 bg-teal-600 rounded-full animate-pulse"
+          ></div>
+        </div>
+      </div>
+    </div>
+
+    <main class="max-w-4xl mx-auto p-3 sm:p-5">
+      <header class="bg-white border border-slate-200 rounded-lg p-4 shadow-sm">
+        <h1 class="text-lg font-bold">Buscador de Sitios</h1>
+        <p id="header-subtitle" class="text-xs text-slate-500 mt-1">
+          Cargando datos...
+        </p>
+      </header>
+
+      <nav class="flex gap-2 mt-3">
+        <button
+          class="tab-btn px-3 py-2 rounded-md border text-sm font-semibold border-teal-600 text-teal-700 bg-teal-50"
+          data-tab="search"
+        >
+          Buscar
+        </button>
+        <button
+          class="tab-btn px-3 py-2 rounded-md border text-sm font-semibold border-slate-300 text-slate-600 bg-white"
+          data-tab="config"
+        >
+          Editar datos
+        </button>
+      </nav>
+
+      <section id="panel-search" class="mt-3">
+        <div class="bg-white border border-slate-200 rounded-lg p-3 shadow-sm">
+          <div id="sync-wrap"></div>
+          <div id="load-wrap" class="text-sm text-slate-500 py-8 text-center">
+            Cargando sitios desde Google Sheets...
+          </div>
+          <div id="search-wrap" class="hidden">
+            <input
+              id="search-input"
+              class="w-full border border-slate-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-teal-500"
+              placeholder="Codigo: LI0314, AC4534..."
+              autocomplete="off"
+            />
+            <div id="search-results" class="mt-3"></div>
+          </div>
+        </div>
+      </section>
+
+      <section id="panel-config" class="mt-3 hidden">
+        <div class="bg-white border border-slate-200 rounded-lg p-3 shadow-sm">
+          <h2 class="text-sm font-bold">Editar folio o llaves</h2>
+          <p class="text-xs text-slate-500 mt-1 mb-3">
+            Se guarda localmente en este navegador y tiene prioridad sobre el
+            sheet.
+          </p>
+          <input
+            id="config-input"
+            class="w-full border border-slate-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-teal-500"
+            placeholder="Busca por codigo o nombre..."
+            autocomplete="off"
+          />
+          <div id="config-suggestions" class="mt-3"></div>
+          <div id="config-form" class="mt-3"></div>
+        </div>
+      </section>
+    </main>
+
+    <div
+      id="toast"
+      class="fixed left-1/2 -translate-x-1/2 bottom-5 px-4 py-2 bg-slate-900 text-white text-xs rounded-full opacity-0 pointer-events-none transition"
+    >
+      Copiado
+    </div>
+
+    <script type="module" src="./src/js/app.js"></script>
+  </body>
+</html>
