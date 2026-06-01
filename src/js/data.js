@@ -26,6 +26,9 @@ export function parseCSV(text) {
     skippedBadCoords: 0,
     skippedOutOfRange: 0,
     skippedDuplicateId: 0,
+    duplicateIds: [],
+    invalidCoordIds: [],
+    outOfRangeIds: [],
   };
   for (let i = 2; i < lines.length; i++) {
     const cols = splitCSVLine(lines[i]);
@@ -34,9 +37,9 @@ export function parseCSV(text) {
     if (!cols[9] || !cols[10]) { stats.skippedNoCoords++; continue; }
     const lat = Number.parseFloat(cols[9]);
     const lon = Number.parseFloat(cols[10]);
-    if (Number.isNaN(lat) || Number.isNaN(lon)) { stats.skippedBadCoords++; continue; }
-    if (lat < -90 || lat > 90 || lon < -180 || lon > 180) { stats.skippedOutOfRange++; continue; }
-    if (seenIds.has(id)) { stats.skippedDuplicateId++; continue; }
+    if (Number.isNaN(lat) || Number.isNaN(lon)) { stats.skippedBadCoords++; stats.invalidCoordIds.push(id); continue; }
+    if (lat < -90 || lat > 90 || lon < -180 || lon > 180) { stats.skippedOutOfRange++; stats.outOfRangeIds.push(id); continue; }
+    if (seenIds.has(id)) { stats.skippedDuplicateId++; stats.duplicateIds.push(id); continue; }
     seenIds.add(id);
     const llaves = (cols[26] || "").trim();
     const folio = (cols[30] || "").trim() || (cols[31] || "").trim();
@@ -62,24 +65,34 @@ export async function loadSheetData() {
   if (window.location.protocol === "file:") {
     throw new Error("CORS por file://. Abre via http://localhost.");
   }
-  let lastError = "No se pudo conectar";
-  for (const buildUrl of SHEET_URLS) {
+  const requests = SHEET_URLS.map((buildUrl) => {
     const url = buildUrl(CONFIG);
-    try {
-      const resp = await fetch(url, { cache: "no-store" });
-      if (!resp.ok) {
-        lastError = `HTTP ${resp.status} (${url.includes("/gviz/") ? "gviz" : "export"})`;
-        continue;
+    return new Promise(async (resolve, reject) => {
+      const controller = new AbortController();
+      const timer = setTimeout(() => controller.abort(), 5000);
+      try {
+        const resp = await fetch(url, { cache: "no-store", signal: controller.signal });
+        if (!resp.ok) {
+          reject(new Error(`HTTP ${resp.status} (${url.includes("/gviz/") ? "gviz" : "export"})`));
+          return;
+        }
+        const text = await resp.text();
+        if (!text || !text.trim()) {
+          reject(new Error("CSV vacio"));
+          return;
+        }
+        resolve(text);
+      } catch (e) {
+        if (e?.name === "AbortError") reject(new Error("Tiempo de espera agotado (5s)"));
+        else reject(new Error(e?.message || "Error de red/CORS"));
+      } finally {
+        clearTimeout(timer);
       }
-      const text = await resp.text();
-      if (!text || !text.trim()) {
-        lastError = "CSV vacio";
-        continue;
-      }
-      return text;
-    } catch (e) {
-      lastError = e?.message || "Error de red/CORS";
-    }
+    });
+  });
+  try {
+    return await Promise.any(requests);
+  } catch {
+    throw new Error("No se pudo conectar al Sheet (export/gviz).");
   }
-  throw new Error(lastError);
 }
