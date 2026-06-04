@@ -11,22 +11,31 @@ export function saveOverrides(data) {
 
 export function applyOverrides(baseSites) {
   const overrides = loadOverrides();
-  return baseSites.map((site) => overrides[site.id] ? { ...site, ...overrides[site.id] } : { ...site });
+  return baseSites.map((site) => (overrides[site.id] ? { ...site, ...overrides[site.id] } : { ...site }));
 }
 
 export function saveSiteOverride(siteId, folio, llaves) {
   const overrides = loadOverrides();
   if (!overrides[siteId]) overrides[siteId] = {};
   overrides[siteId].folio = folio;
-  const zona = llaves.toUpperCase();
-  if (LLAVES_MAP[zona]) {
-    overrides[siteId].llaves = zona;
-    overrides[siteId].llaves_zona = zona;
-    overrides[siteId].llaves_full = LLAVES_MAP[zona];
+  const zoneKey = llaves.toUpperCase();
+  if (LLAVES_MAP[zoneKey]) {
+    overrides[siteId].llaves = zoneKey;
+    overrides[siteId].llaves_zona = zoneKey;
+    overrides[siteId].llaves_full = LLAVES_MAP[zoneKey];
   } else {
     overrides[siteId].llaves = llaves;
     overrides[siteId].llaves_zona = llaves;
     overrides[siteId].llaves_full = llaves;
   }
   saveOverrides(overrides);
+}
+
+export function loadSheetSnapshot() {
+  try { return JSON.parse(localStorage.getItem(CONFIG.sheetSnapshotKey) || "null"); }
+  catch { return null; }
+}
+
+export function saveSheetSnapshot(snapshot) {
+  localStorage.setItem(CONFIG.sheetSnapshotKey, JSON.stringify(snapshot));
 }

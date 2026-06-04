@@ -3,6 +3,8 @@ export const CONFIG = {
   gid: "0",
   locale: "es-PE",
   overridesKey: "sitios_overrides",
+  sheetSnapshotKey: "sitios_sheet_snapshot",
+  idPattern: /^[A-Z]{2,4}\d{3,6}$/,
 };
 
 export const LLAVES_MAP = {
